@@ -155,15 +155,14 @@ fn processar_nome(nome: String) {
 Tente usar a variável no `main` após passá-la para a função:
 
 ```rust
+fn recebe_nome(nome: String) {
+    println!("Olá, {nome}");
+}
+
 fn main() {
-    let usuario = String::from("Alexandre");
-
-    // Raciocínio: Ao passar 'usuario', o Ownership é TRANSFERIDO.
-    // 'usuario' não é mais o dono. O novo dono é o parâmetro 'nome' da função.
-    processar_nome(usuario);
-
-    // ERRO! Tentamos usar algo que não nos pertence mais.
-    // println!("Tentando usar de novo: {usuario}"); 
+    let usuario = String::from("Ana");
+    recebe_nome(usuario);      // move
+    println!("{usuario}");     // erro aqui
 }
 ```
 
@@ -174,6 +173,7 @@ fn main() {
 * **Comando:** `cargo run`
 
 O compilador vai dar um erro clássico: `value borrowed here after move`.
+
 Ele até desenha uma seta indicando onde o valor foi "movido" (`move occurs because usuario has type String`).
 
 ---
