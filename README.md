@@ -22,10 +22,31 @@ Antes de escrevermos qualquer lógica, precisamos definir o alicerce do nosso pr
 Adicione as seguintes linhas no final do seu `Cargo.toml`:
 
 ```toml
+# RACIOCÍNIO UNIFICADO (Akita Mode: Abstração + Bits):
+# Entenda: o 'Cargo.toml' é o Manifesto do seu projeto (Project Manifest), 
+# onde ele descreve o que o projeto é e do que ele precisa para compilar e rodar,
+# onde ele reúne os metadados do projeto e define dependências e configurações de compilação.
+ 
+# Ele não é só uma lista de compras; é o contrato que define como o Orquestrador 
+# de Build (Cargo) deve montar o seu linguição de bits. 
+# Diferente do JavaScript, onde você baixa binários pré-compilados e reza pro 
+# 'node_modules' não quebrar, o Rust baixa o código-fonte e compila tudo 
+# localmente para garantir compatibilidade binária total com a sua CPU.
+
 [dependencies]
-# AQUI: rand versão 0.8 para geração de números aleatórios na escolha da máquina.
+# RACIOCÍNIO HUMANO: Precisamos de entropia (aleatoriedade) pra máquina jogar.
+# RACIOCÍNIO DO COMPUTADOR: O Cargo resolve o grafo de dependências 
+# (Dependency Graph), busca os bytes no crates.io e o compilador (rustc) 
+# faz o Link Estático (Static Linking). O código da biblioteca morre dentro 
+# do seu binário final, sem depender de DLLs externas no SO.
 rand = "0.8.5"
-# AQUI: thiserror versão 1.0 para criarmos erros de domínio com a macro #[derive(Error)].
+
+# RACIOCÍNIO HUMANO: Queremos erros elegantes sem escrever centenas de linhas inúteis.
+# RACIOCÍNIO DO COMPUTADOR: Essa crate habilita Macros Procedurais 
+# (Procedural Macros). Em tempo de compilação (Compile-time), ela faz 
+# Metaprogramação: lê suas structs e injeta instruções de baixo nível para 
+# implementar as Traits de erro automaticamente. É o que chamamos de 
+# Abstração de Custo Zero (Zero-Cost Abstraction).
 thiserror = "1.0.50"
 ```
 
@@ -45,9 +66,11 @@ No terminal, execute o comando:
 
 **Raciocínio e Problema Arquitetural:**
 
-Em muitas linguagens, desenvolvedores representam escolhas finitas usando strings (`"pedra"`, `"papel"`) ou inteiros (`0`, `1`, `2`). Isso é um anti-pattern conhecido como *Primitive Obsession*. Se usarmos uma string, o compilador não pode nos impedir de passar `"fogo"` ou `"lagarto"`, causando erros em tempo de execução.
+Em muitas linguagens, desenvolvedores representam escolhas finitas usando strings (`"pedra"`, `"papel"`) ou inteiros (`0`, `1`, `2`). Isso é um anti-pattern conhecido como *Primitive Obsession*, onde usaríamos tipos primitivos demais (String, int, bool, etc.) para representar conceitos de negócio que mereciam tipos próprios.
 
-Em Rust, usamos *Enums* (Tipos Algébricos de Dados). Eles garantem tipagem estrita e exaustividade em tempo de compilação. Se o nosso domínio define que existem apenas três jogadas possíveis, o sistema de tipos deve refletir isso matematicamente. O mesmo vale para o resultado da partida.
+Se usarmos uma string, o compilador não pode nos impedir de passar `"fogo"` ou `"lagarto"`, causando erros em tempo de execução.
+
+Em Rust, usamos *Enums* (Tipos Algébricos de Dados). Eles garantem tipagem estrita (cada valor tem um tipo certo, e misturas erradas dão erro na compilação) e exaustividade ( em estruturas como match, você é obrigado a tratar todos os casos possíveis) em tempo de compilação. Se o nosso domínio define que existem apenas três jogadas possíveis, o sistema de tipos deve refletir isso matematicamente. O mesmo vale para o resultado da partida.
 
 **Mapeamento de Arquivos e Módulos:**
 
@@ -61,19 +84,29 @@ Adicione o seguinte código no arquivo recém-criado `src/domain/models.rs`:
 
 ```rust
 // RACIOCÍNIO HUMANO (A Abstração): 
-// Entenda o seguinte: usar string de texto pura pra representar uma escolha finita é coisa de amador. 
-// Em engenharia de verdade e modelagem de domínios (Domain-Driven Design), a gente restringe 
-// as opções usando 'enums' (Tipos Algébricos de Dados). Isso cria uma fronteira rígida. 
-// Não tem como o sistema aceitar um estado inválido se o domínio matematicamente só conhece três regras.
+// Pare de ser um "vibe coder" e aprenda Domain-Driven Design (DDD). No JavaScript, 
+// você usaria strings ("pedra"). Se alguém digitar "PEDRA" ou "podra", seu 
+// 'if' quebra em runtime. Usando Enums (Algebraic Data Types - ADTs), você cria 
+// uma Linguagem Ubíqua (Ubiquitous Language) no código. O domínio diz que só 
+// existem 3 opções; o compilador (rustc) vira seu sargento e não deixa o programa 
+// nem compilar se você tentar inventar uma quarta opção.
 //
 // RACIOCÍNIO DO COMPUTADOR (A Escovação de Bits): 
-// Não tem mágica. O compilador (rustc) é burro, ele precisa que você diga tudo. 
-// Essa macro #[derive(...)] é só metaprogramação para geração automática de código (Boilerplate) em tempo de compilação.
-// - Debug: O compilador injeta o código necessário para serializar essa estrutura em texto para o 'stdout'.
-// - PartialEq/Eq: Gera as instruções de CPU para fazer a comparação direta dos valores na memória (Bitwise Comparison).
-// - Clone/Copy: Aqui é o trade-off de performance. Esse enum é minúsculo, cabe em um único byte. 
-//   Avisamos ao compilador que é infinitamente mais barato para a CPU simplesmente duplicar esse byte 
-//   direto na memória rápida (Stack) do que rastrear ponteiros e invocar as regras de posse de memória (Borrow Checker).
+// O compilador é preguiçoso. A macro #[derive] é Metaprogramação (Metaprogramming), onde o 
+// o compilador gera código automaticamente para você.
+// Em tempo de compilação, o Rust lê sua definição e "escreve" o código de baixo nível pra você:
+// - Debug (Formatting): Gera as instruções pro binário saber como converter esses 
+//   bits em texto legível para o 'stdout' (“saída padrão” de um programa).
+// - PartialEq/Eq (Comparison): Gera a lógica de Comparação Bit-a-Bit (Bitwise Comparison) 
+//   direto na CPU. No JS, comparar objetos é caro; aqui é uma instrução simples de registrador.
+// 
+// - Clone/Copy (Semântica de Memória): Este Enum é uma Tagged Union (União Etiquetada), QUE  
+//   pode guardar um entre vários formatos possíveis, junto com uma etiqueta que diz qual formato está ativo naquele momento.
+//   Ele ocupa apenas 1 byte na RAM. Avisamos ao compilador que é mais barato 
+//   duplicar esse byte na Pilha (Stack) do que rastrear Posse (Ownership).
+// 
+//   É a famosa Abstração de Custo Zero (Zero-Cost Abstraction), onde
+//   você escreve código em alto nível (mais claro e seguro), mas sem pagar desempenho extra em tempo de execução.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Jogada {
     Pedra,
@@ -82,13 +115,16 @@ pub enum Jogada {
 }
 
 // RACIOCÍNIO HUMANO (A Abstração): 
-// Representa o desfecho determinístico da nossa rodada, sem margem para ambiguidades.
+// Define o desfecho determinístico da rodada. No Rust, não existe "undefined". 
+// Ou você tem um Resultado, ou o código não compila.
 //
 // RACIOCÍNIO DO COMPUTADOR (A Escovação de Bits): 
-// Preste atenção: a gente não usou 'Clone' ou 'Copy' aqui. Por quê? Porque não existe almoço grátis. 
-// O 'Resultado' é gerado, lido num padrão condicional (Pattern Matching) para imprimir no terminal, 
-// e imediatamente jogado fora. Ele não transita entre funções. Não há necessidade de instruir o 
-// compilador a habilitar semântica de cópia se o ciclo de vida (Lifetime) da variável acaba na mesma instrução (Dropped).
+// Preste atenção no que NÃO está aqui: 'Clone' e 'Copy'. Por quê? Porque não 
+// existe almoço grátis (No Free Lunch). O 'Resultado' é gerado pela engine, 
+// lido por um Casamento de Padrões (Pattern Matching) na main e imediatamente 
+// descartado (Dropped). Como ele não transita entre múltiplas threads ou 
+// funções complexas, não faz sentido instruir o compilador a gerar código de 
+// cópia para um dado que morre no mesmo Ciclo de Vida (Lifetime) em que nasceu.
 #[derive(Debug, PartialEq, Eq)]
 pub enum Resultado {
     Vitoria,
@@ -100,59 +136,66 @@ pub enum Resultado {
 Agora, registre o módulo no arquivo `src/domain/mod.rs`:
 
 ```rust
-// RACIOCÍNIO HUMANO (A Abstração): 
-// Iniciante de framework web acha que é só jogar arquivo numa pasta e a linguagem 
-// tem a obrigação de adivinhar e carregar tudo magicamente. Em engenharia de software 
-// de verdade, você define fronteiras estritas (Encapsulamento / Bounded Contexts). 
-// A pasta 'domain' não é só uma pasta, é um módulo. O arquivo 'mod.rs' atua como o 
-// porteiro. Ao declarar 'pub mod models', você define um contrato estrito dizendo: 
-// "A API (Application Programming Interface) de modelos está exposta, podem usar". 
-// Sem código espaguete.
+// RACIOCÍNIO UNIFICADO (Akita Mode: Abstração + Bits):
+// Pare de ser amador. No JS, você dá um 'export' em tudo e reza. Aqui, 
+// o 'mod' é uma Diretiva de Compilação (Compiler Directive). Você está 
+// mandando o rustc dar um 'STOP' na main, ir no disco, ler 'models.rs', 
+// fazer o parse pra Árvore Sintática Abstrata (AST) e compilar.
 //
-// RACIOCÍNIO DO COMPUTADOR (A Escovação de Bits): 
-// Não tem mágica de auto-discovery. O compilador (rustc) é propositalmente cego 
-// para o sistema de arquivos (File System) do seu SO. Essa linha é uma diretiva 
-// estrita (Compiler Directive). Ela manda a CPU ir no disco, ler o arquivo 'models.rs', 
-// fazer o parse e gerar a árvore de compilação (AST - Abstract Syntax Tree). 
-// O prefixo 'pub' (Public) é apenas uma flag: ele instrui o compilador a alterar 
-// sua tabela de símbolos (Symbol Table), injetando as referências dessas structs 
-// no escopo global (Namespace) para o Linker conseguir conectar com a main.rs. 
-// Sem isso, é erro de escopo privado na hora da compilação.
+// O 'pub' (Public Visibility) é a sua única forma de alterar a Tabela de 
+// Símbolos (Symbol Table). Sem o 'pub', o Linker não enxerga as structs 
+// lá dentro. É assim que Rust garante que você não acesse o que não deve, 
+// sem precisar de custos de runtime ou máquinas virtuais lentas.
 pub mod models;
 ```
+
+### A Vantagem Real em cima do JavaScript (Node.js)
+
+1. **Custo de Resolução:** No JavaScript, o Node.js precisa percorrer o sistema de arquivos em **tempo de execução** (Runtime) toda vez que encontra um `require`, o que é lento. No Rust, toda a árvore de módulos é resolvida e "achatada" em **tempo de compilação**. O custo no executável final é **zero**.
+2. **Segurança de Fronteira:** No JS, é muito fácil exportar algo por acidente. No Rust, se você não declarar `pub mod`, o compilador nem olha pro arquivo. Ele é cego por padrão. Isso força você a desenhar a arquitetura (Bounded Contexts) antes de sair cuspindo código.
+3. **Compilação Incremental:** Como a árvore é explícita, o `cargo` sabe exatamente qual pedaço do gráfico de módulos mudou, recompilando apenas os bits necessários. No JS, os bundlers (Webpack/Vite) sofrem para fazer o mesmo "tree shaking" que o Rust faz nativamente.
 
 E no topo do seu `src/main.rs`, adicione:
 
 ```rust
 // RACIOCÍNIO HUMANO (A Abstração): 
-// Iniciante acostumado com framework web mágico acha que é só criar pasta e jogar arquivo 
-// que o código se auto-descobre. Em engenharia de software de verdade, a gente é explícito. 
-// A declaração 'mod' é você desenhando a arquitetura na mão: "Olha, existe uma fronteira 
-// de regra de negócio (Bounded Context) chamada 'domain', conecte ela à aplicação principal".
+// Pare de ser amador. No JavaScript (Node.js), você simplesmente faz um 'import' e 
+// o runtime se vira pra achar o arquivo em tempo de execução. No Rust, você desenha 
+// a árvore de módulos na mão. 'mod domain' define a fronteira do seu Bounded Context 
+// (Contexto Delimitado). Você está dizendo: "Olha, existe um sub-sistema de regras 
+// de negócio chamado 'domain', conecte ele agora".
 //
 // RACIOCÍNIO DO COMPUTADOR (A Escovação de Bits): 
-// Não tem mágica de auto-load. O arquivo 'src/main.rs' é o ponto zero do compilador 
-// (Crate Root). Quando o compilador (rustc) esbarra no 'mod domain;', ele pausa o parsing 
-// atual, faz I/O no disco buscando 'domain.rs' ou 'domain/mod.rs', converte esse texto 
-// em uma Árvore Sintática Abstrata (AST) em memória e instrui o vinculador (Linker) a 
-// juntar o código de máquina gerado no binário final. Sem essa instrução estrita, a 
-// pasta é ignorada e descartada (Dead Code Elimination).
+// O arquivo 'main.rs' é o ponto zero do compilador (Crate Root). O 'rustc' é cego 
+// pro seu HD. Esta linha é uma Diretiva de Compilação (Compiler Directive) estrita. 
+// Ela manda a CPU fazer I/O no disco, ler 'domain/mod.rs', fazer o parse para a 
+// Árvore Sintática Abstrata (AST) e instruir o Linker a juntar esses bits no 
+// binário final. Sem isso, a pasta é ignorada (Dead Code Elimination).
+//
+// VANTAGEM SOBRE JAVASCRIPT: No JS, o custo de resolver onde o arquivo está 
+// acontece em runtime, toda vez que o programa roda. No Rust, isso é resolvido 
+// uma única vez em tempo de compilação. O custo no executável final é ZERO.
 mod domain;
 
 // RACIOCÍNIO HUMANO (A Abstração): 
-// Todo software executável precisa de uma porta de entrada inquestionável. A 'main' é 
-// de onde o fluxo de execução (Control Flow) parte. O 'println!' é só um feedback 
-// visual básico pra gente ter certeza de que o processo acordou e não morreu no meio do caminho.
+// Todo software executável precisa de uma porta de entrada inquestionável. 
+// A 'main' é o marco zero do seu fluxo de execução (Control Flow). 
+// O 'println!' é só um feedback visual pra você saber que o processo não 
+// "morreu" ao ser carregado pelo Sistema Operacional.
 //
 // RACIOCÍNIO DO COMPUTADOR (A Escovação de Bits): 
-// O Linker mapeia a 'fn main()' para o ponto de entrada (Entry Point) oficial que o 
-// Sistema Operacional (OS) exige para alocar o processo. Quando o OS joga seu binário 
-// na memória RAM, o ponteiro de instrução da CPU (Instruction Pointer) é cravado 
-// exatamente no primeiro byte dessa função. E presta atenção: aquele '!' no 'println!' 
-// significa que não é uma função, é uma macro (Metaprogramming). Em tempo de compilação, 
-// o Rust expande isso gerando um código gigante de baixo nível para travar o buffer 
-// de saída do terminal (Standard Output) com segurança, garantindo que não vai dar 
-// falha de segmentação (Segmentation Fault).
+// O Linker mapeia a 'fn main()' para o Entry Point oficial exigido pelo SO. 
+// Quando o binário entra na RAM, o ponteiro de instrução da CPU (Instruction Pointer) 
+// aponta exatamente pro primeiro byte desta função. 
+// O '!' em 'println!' avisa que isso é uma Macro (Metaprogramming). Em tempo de 
+// compilação, o Rust expande isso gerando um código gigante de baixo nível para 
+// fazer uma Syscall (Chamada de Sistema) segura, travando o buffer do terminal 
+// (Standard Output) para garantir que você não tenha uma Falha de Segmentação.
+//
+// VANTAGEM SOBRE JAVASCRIPT: No JS, o 'console.log' é uma função dinâmica que 
+// depende de um objeto global pesado no runtime. No Rust, o código de impressão 
+// é injetado diretamente no binário como instruções nativas. É mais rápido e 
+// consome ordens de grandeza menos memória.
 fn main() {
     println!("Jokenpo inicializado!");
 }
@@ -190,43 +233,72 @@ Para tratar a conversão de texto, criaremos um Erro Customizado e usaremos a tr
 3. Edite `src/domain/models.rs` para adicionar a implementação.
 
 **Código Incremental Estrito:**
+Se o seu tratamento de erro é dar um `throw` numa string aleatória e torcer para o `try/catch` do outro lado da aplicação adivinhar o que aconteceu, você não está programando, você está jogando dados. Em engenharia de software de verdade, falhas são parte do seu **Domínio**.
+
+O problema que resolvemos aqui é a **Sinalização de Falhas Determinística**. No JavaScript, você lança uma exceção que interrompe o fluxo de execução (Stack Unwinding) e consome recursos pesados do runtime. No Rust, usamos o sistema de tipos para dizer: "Esta função pode retornar uma `Jogada` ou este erro específico".
+
+Usamos a crate `thiserror` para evitar o trabalho braçal de implementar manualmente as Traits nativas de exibição de texto (`Display`) e identificação de erro (`Error`). Isso garante que nossa abstração de alto nível não custe nem um ciclo de CPU extra no binário final.
 
 Primeiro, em `src/domain/errors.rs`:
 
 ```rust
 use thiserror::Error;
 
-// RACIOCÍNIO UNIFICADO (Abstração Humana + Escovação de Bits):
-// Iniciante de linguagem dinâmica acha que tratamento de erro é só dar 'throw' numa string 
-// aleatória e rezar pro lado de lá não crashear. Em engenharia de software robusta, erros 
-// são cidadãos de primeira classe (First-Class Citizens) do seu Domínio. Nós modelamos 
-// falhas de forma estrita e finita usando Enums (Tipos Algébricos de Dados).
+// RACIOCÍNIO UNIFICADO (Akita Mode):
+// No JS, você tem o 'throw' que é um "GoTo" glorificado e imprevisível. Aqui, o JokenpoError 
+// é um Cidadão de Primeira Classe (First-Class Citizen). Se o usuário digitar "fogo", 
+// isso não é um erro de sistema, é um evento de domínio: 'EntradaInvalida'.
 //
-// Só que o compilador (rustc) não aceita qualquer coisa como erro. Para esse Enum se 
-// integrar com o resto do ecossistema, ele precisa assinar o contrato da interface nativa 
-// 'std::error::Error' e saber se imprimir na tela ('std::fmt::Display'). Escrever essas 
-// implementações na mão gera dezenas de linhas de código inútil (Boilerplate). 
+// PRO COMPUTADOR: A diretiva #[derive(Error, Debug)] aciona uma Macro Procedural. 
+// Em tempo de compilação, o rustc pausa, lê sua struct e "escreve" o código de 
+// baixo nível pra CPU saber como formatar esses bytes no terminal. 
 //
-// É aqui que usamos a crate 'thiserror'. A diretiva #[derive(Error)] é metaprogramação 
-// (Metaprogramming) pura. Em tempo de compilação, o compilador pausa, lê a sua Árvore 
-// Sintática (AST - Abstract Syntax Tree), esbarra no #[error("...")] e gera dinamicamente 
-// todas as instruções de baixo nível de CPU para formatar os bytes do texto. Ele já cria o 
-// código que injeta a String interna '{0}' no lugar certo da mensagem, resolvendo o 
-// apontamento de memória para você. Isso é o que chamamos de abstração com zero custo de 
-// performance em tempo de execução (Zero-Cost Abstraction).
+// VANTAGEM SOBRE JS: Enquanto no Node.js você gasta memória rastreando a Stack Trace 
+// inteira de uma exceção, o Rust usa Enums (Tagged Unions) que ocupam o espaço exato 
+// do dado na Stack. É a prova de que não existe almoço grátis: você tem a conveniência 
+// da mensagem bonitinha #[error("...")] sem pagar o pato da performance em runtime.
 #[derive(Error, Debug)]
 pub enum JokenpoError {
+    // O '{0}' instrui o compilador a injetar a String interna na mensagem de texto 
+    // gerada, resolvendo o apontamento de memória automaticamente para você.
     #[error("Jogada inválida: {0}. Escolha pedra, papel ou tesoura.")]
     EntradaInvalida(String),
 }
 ```
 
+Em engenharia de software de verdade, o código não se "auto-descobre".
+
+O problema que resolvemos aqui é o do **Encapsulamento e Granularidade**. No JavaScript (Node.js), você simplesmente faz um `require('./errors')` ou um `import` e o runtime se vira para achar o arquivo no disco em tempo de execução. Isso é "mágico", lento e perigoso, porque incentiva código espaguete onde qualquer um acessa qualquer coisa. No Rust, o sistema de módulos é uma **árvore explícita**.
+
+A pasta `domain` não existe para o compilador até que você a declare na raiz. E o arquivo `mod.rs` é o "contrato de exportação" dessa pasta. Ele decide o que é privado (detalhe de implementação) e o que é público (API). Sem o `pub mod`, seu arquivo `errors.rs` é apenas lixo no HD que o compilador ignora para economizar processamento (**Dead Code Elimination**).
+
 Exponha o módulo adicionando em `src/domain/mod.rs`:
 
 ```rust
 pub mod models;
-pub mod errors; // Adicione esta linha
+// RACIOCÍNIO UNIFICADO (Akita Mode: Abstração + Bits):
+// Pare de ser amador. No JS, você dá um 'export' em tudo e reza pro runtime 
+// achar. Aqui, o 'mod' é uma Diretiva de Compilação (Compiler Directive) 
+// estrita. Você está mandando o rustc dar um 'STOP', ir no disco, ler 
+// 'errors.rs', fazer o parse pra Árvore Sintática Abstrata (AST) e compilar.
+//
+// O 'pub' (Public Visibility) é a sua única forma de alterar a Tabela de 
+// Símbolos (Symbol Table) do compilador. Sem o 'pub', o Linker não enxerga 
+// os endereços de memória dessas structs. É assim que Rust garante que 
+// você não acesse o que não deve, sem precisar de custos de runtime ou 
+// máquinas virtuais pesadas.
+pub mod errors;
 ```
+
+### A Vantagem Real em cima do JavaScript (Node.js)
+
+1. **Custo de Resolução Zero:** No JavaScript, o Node.js precisa percorrer o sistema de arquivos em **tempo de execução** toda vez que encontra um import, o que consome I/O e CPU desnecessariamente. No Rust, toda a árvore é resolvida e "achatada" em **tempo de compilação**. O custo no executável final é **zero**.
+2. **Segurança de Fronteira:** No JS, é muito fácil exportar um objeto por acidente e vazar estado interno. No Rust, se você não declarar `pub mod`, o compilador sequer olha pro arquivo. Ele é cego por padrão. Isso te força a desenhar os **Bounded Contexts** do seu Jokenpo antes de sair cuspindo código.
+3. **Binário Otimizado:** Como a árvore é explícita, o compilador sabe exatamente o que não está sendo usado e simplesmente não inclui esses bits no executável. O "Tree Shaking" do Rust é nativo e agressivo, enquanto no JS você depende de ferramentas externas como Rollup ou Webpack que muitas vezes falham.
+
+Agora e agora vamos blindar o domínio e escova os bits para que a CPU não trabalhe à toa.
+
+O problema aqui é o da **Primitive Obsession** (Obsessão por Primitivos) e o custo de **Runtime Exceptions**. No JavaScript, você faria um `parseInt` ou um `if(s === "pedra")` e torceria para não vir um `undefined`. No Rust, usamos o bloco `impl` para colar a lógica no dado (Domain Driven Design) e a Trait `FromStr` para criar uma barreira física: o dado sujo do mundo externo (Terminal/Rede) morre na entrada, e apenas tipos válidos entram no coração do sistema.
 
 Agora, adicione as regras de negócio em `src/domain/models.rs` (no final do arquivo):
 
@@ -234,31 +306,52 @@ Agora, adicione as regras de negócio em `src/domain/models.rs` (no final do arq
 use std::str::FromStr;
 use crate::domain::errors::JokenpoError;
 
-// AQUI: Implementamos a lógica como métodos associados à própria enumeração.
+// RACIOCÍNIO UNIFICADO (Akita Mode):
+// Entenda: Lógica de Domínio (Domain Logic) DEVE estar grudada no dado. 
+// No binário, o bloco 'impl' instrui o rustc a associar funções ao Nome de Espaço (Namespace). 
+// Métodos não ocupam espaço na RAM; são apenas endereços (Instruction Pointers) 
+// no executável. É o ápice do desacoplamento sem custo de runtime.
 impl Jogada {
-    // Recebe referências imutáveis (&self, &other) pois não precisamos modificar as jogadas para avaliá-las.
+    
+    // RACIOCÍNIO HUMANO: Pra decidir o vencedor, usamos análise combinatória estrita.
+    // PRO COMPUTADOR: Note as referências imutáveis (&). Passamos apenas endereços 
+    // da Pilha (Stack Pointers), sem mover Posse (Ownership). O LLVM transforma 
+    // o match de tuplas em uma Tabela de Saltos (Jump Table) na CPU.
+    // VANTAGEM SOBRE JS: No JavaScript, comparar objetos ou strings exige percorrer 
+    // a Heap. No Rust, é O(1) - uma instrução direta de comparação de bits.
     pub fn avaliar(&self, oponente: &Jogada) -> Resultado {
         match (self, oponente) {
+            // Casamento de Padrões (Pattern Matching) com operador OR (|).
             (Jogada::Pedra, Jogada::Tesoura) |
             (Jogada::Papel, Jogada::Pedra) |
             (Jogada::Tesoura, Jogada::Papel) => Resultado::Vitoria,
             
+            // Cláusula de Guarda (Guard Clause) para comparação bit-a-bit (Bitwise Comparison).
             (a, b) if a == b => Resultado::Empate,
-            _ => Resultado::Derrota,
+            
+            // Coringa (Wildcard / Catch-all) para o resto (Default Case).
+            _ => Resultado::Derrota, 
         }
     }
 }
 
-// AQUI: Implementação padronizada do Rust para converter String em tipos.
+// RACIOCÍNIO HUMANO: Criamos um Bounded Context (Contexto Delimitado). 
+// PRO COMPUTADOR: Ao assinar o contrato da Trait 'FromStr', você habilita 
+// Abstração de Custo Zero. O 'Result' é uma União Etiquetada (Tagged Union) 
+// que obriga você, em tempo de compilação, a tratar o Erro.
+// VANTAGEM SOBRE JS: No Node.js, você usaria try/catch, que "fura" a Stack 
+// de execução e é lento. Aqui, o erro é apenas um valor de retorno 
+// que o compilador não deixa você ignorar. Sem bugs de "undefined" em produção.
 impl FromStr for Jogada {
     type Err = JokenpoError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // Sanitização (Sanitization) e normalização (Normalization).
         match s.trim().to_lowercase().as_str() {
             "pedra" => Ok(Jogada::Pedra),
             "papel" => Ok(Jogada::Papel),
             "tesoura" => Ok(Jogada::Tesoura),
-            // AQUI: Retornamos nosso erro customizado encapsulado no Result::Err
+            // Encapsulamento em Erro de Domínio (Domain Error Handling).
             invalido => Err(JokenpoError::EntradaInvalida(invalido.to_string())),
         }
     }
@@ -292,39 +385,85 @@ Em Rust, alcançamos isso via *Traits* (interfaces). Definimos uma Trait `Jogado
 
 **Código Incremental Estrito:**
 
+Aqui, a gente usa abstrações pra guiar o compilador a gerar o binário mais eficiente possível, sem desperdiçar um único ciclo de clock.
+
 Em `src/domain/player.rs`:
 
 ```rust
 use crate::domain::models::Jogada;
 use rand::Rng;
 
-// AQUI: Contrato de comportamento. Qualquer struct que implementar isso pode jogar.
+// RACIOCÍNIO UNIFICADO (Akita Mode):
+// No JavaScript ou TypeScript, uma interface é apenas uma "sugestão" que o transpiler 
+// joga no lixo assim que gera o .js (Type Erasure). Aqui, a 'trait' é um contrato 
+// físico. O compilador usa isso pra realizar a Monomorfização (Monomorphization): 
+// ele gera uma versão do código pra cada tipo que implementa a Trait.
+// 
+// PRO COMPUTADOR: Isso habilita o Despacho Estático (Static Dispatch). Diferente 
+// do Java ou C# que usam tabelas de métodos virtuais (Vtable) lentas que exigem 
+// saltos indiretos na memória, o Rust resolve o endereço da função em tempo de 
+// compilação. É performance de C puro com a segurança de uma linguagem moderna.
 pub trait Jogador {
     fn escolher_jogada(&self) -> Jogada;
 }
 
+// RACIOCÍNIO HUMANO: Definimos o Bot como uma entidade isolada.
+// PRO COMPUTADOR: Esta é uma 'Unit-like Struct'. Ela é um Tipo de Tamanho Zero 
+// (Zero-Sized Type - ZST). No binário final, ela ocupa EXATAMENTE 0 bytes na RAM. 
+// VANTAGEM SOBRE JS: No Node.js, qualquer "class Player {}" vazia vira um objeto 
+// pesado na Heap com metadados e cadeia de protótipos. No Rust, é custo zero.
 pub struct JogadorComputador;
 
 impl Jogador for JogadorComputador {
     fn escolher_jogada(&self) -> Jogada {
+        // 'thread_rng' acessa o gerador do SO. Isso pode envolver uma Syscall 
+        // (Chamada de Sistema) para buscar entropia do hardware. 
         let mut rng = rand::thread_rng();
-        // AQUI: O método gen_range sorteia um número de 0 a 2. O pattern matching mapeia para o Domínio.
+
+        // RACIOCÍNIO HUMANO: O 'match' garante que a máquina nunca esqueça uma regra.
+        // PRO COMPUTADOR: O compilador transforma esse match em uma Tabela de Saltos 
+        // (Jump Table) na CPU. Em vez de avaliar múltiplos 'if/else' (Branching) 
+        // que podem causar erros de previsão de salto (Branch Misprediction), 
+        // a CPU pula direto pro endereço de memória do variante do Enum. 
+        // É complexidade O(1), a velocidade máxima que o silício permite.
         match rng.gen_range(0..=2) {
             0 => Jogada::Pedra,
             1 => Jogada::Papel,
-            _ => Jogada::Tesoura,
+            _ => Jogada::Tesoura, // (Catch-all) para satisfazer a exaustividade.
         }
     }
 }
 ```
+
+Agora, a árvore de módulos é um contrato explícito de visibilidade e gerenciamento de recursos.
 
 Atualize o `src/domain/mod.rs`:
 
 ```rust
 pub mod models;
 pub mod errors;
-pub mod player; // Adicione esta linha
+
+// RACIOCÍNIO UNIFICADO (Akita Mode: Abstração + Bits):
+// No JavaScript (Node.js), você daria um 'import' ou 'require' e o runtime 
+// tentaria resolver o caminho no disco toda vez que o código rodasse. 
+// Aqui, o 'mod' é uma Diretiva de Compilação (Compiler Directive) estrita. 
+// Você está ordenando que o rustc saia da memória, vá ao HD, leia 'player.rs' 
+// e gere a Árvore Sintática Abstrata (AST) desse sub-sistema.
+
+// O 'pub' (Public) altera a Symbol Table do compilador. Sem ele, os outros 
+// módulos não conseguem enxergar os endereços de memória das structs e traits 
+// de jogadores. É o Bounded Context (Contexto Delimitado) do DDD na prática: 
+// você escolhe o que expõe e o que protege. Sem essa linha, o compilador 
+// aplica Dead Code Elimination e joga seu arquivo no lixo pra economizar binário.
+
+pub mod player;
 ```
+
+### A Vantagem Real em cima do JavaScript (Node.js)
+
+1. **Custo de Runtime ZERO:** No JS, a resolução de módulos acontece em **tempo de execução**, o que é lento e custa I/O. No Rust, o gráfico de dependências é "achatado" em **tempo de compilação**. O binário final já sabe exatamente onde cada função está.
+2. **Encapsulamento de Verdade:** No JS, é muito fácil exportar algo por engano e vazar estado. No Rust, tudo é **privado por padrão**. Se você não for explícito com `pub mod`, o compilador te blinda de criar código espaguete.
+3. **Segurança de Linkagem:** No ecossistema Node, você pode ter erros de "module not found" no meio da execução se esquecer um arquivo. No Rust, se a árvore de módulos não estiver perfeita, o programa sequer é gerado. **É impossível subir um binário incompleto para produção.**
 
 **Como testar e Resultado Esperado:**
 
@@ -342,13 +481,11 @@ No terminal, execute:
 
 **Raciocínio e Problema Arquitetural:**
 
-E se quisermos simular 10 rodadas simultâneas (em threads separadas) de Computador vs Computador para ver se o randomizador é justo, e salvar o total de vitórias do "Player 1" em um placar global?
+Compartilhar memória entre múltiplas threads é como dar uma única caneta para dez pessoas escreverem na mesma folha ao mesmo tempo. Em linguagens "vibe code", você teria um **Data Race** (Condição de Corrida) e seu programa ia cuspir lixo ou explodir. No Rust, o compilador é o seu sargento: ele te obriga a usar padrões de sincronização que garantem a integridade dos bits.
 
-Em C++, compartilhar estado entre threads facilmente resulta em *Data Races* (condições de corrida) e falhas de segmentação. 
+O problema que resolvemos aqui é a **Sincronização de Estado**. No JavaScript (Node.js), você vive no mundo do *Event Loop* (Single-threaded). Para paralelismo real, você usaria *Worker Threads*, mas a comunicação entre elas é feita via troca de mensagens (*message passing*), o que envolve copiar dados e custa caro. No Rust, as threads compartilham o **mesmo espaço de endereçamento**, mas com segurança garantida pelo **Borrow Checker**.
 
-Rust garante *Fearless Concurrency* (Concorrência sem Medo). Para um estado mutável compartilhado entre threads, o compilador nos obriga a usar primitivas de sincronização. 
-
-Usaremos `Arc` (Atomic Reference Counting) para permitir múltiplos "donos" seguros da referência da variável, e `Mutex` (Mutual Exclusion) para garantir que apenas uma thread altere o placar por vez.
+Usamos o **Arc** (Atomic Reference Counting) para permitir que múltiplas threads possuam o ponteiro do placar, e o **Mutex** para garantir que apenas uma CPU por vez altere o bit do contador.
 
 **Mapeamento de Arquivos e Módulos:**
 
@@ -359,23 +496,33 @@ Usaremos `Arc` (Atomic Reference Counting) para permitir múltiplos "donos" segu
 Substitua todo o conteúdo de `src/main.rs` por:
 
 ```rust
+// RACIOCÍNIO UNIFICADO (Akita Mode): 
+// No Rust, concorrência não é "mágica" de runtime. É engenharia estrita.
 mod domain;
 
 use domain::models::Resultado;
 use domain::player::{Jogador, JogadorComputador};
-use std::sync::{Arc, Mutex};
+// Arc: Atomic Reference Counting (Posse compartilhada entre threads).
+// Mutex: Mutual Exclusion (Garante que apenas uma thread acesse o dado).
+use std::sync::{Arc, Mutex}; 
 use std::thread;
 
 fn main() {
-    // AQUI: Criamos um estado protegido. Mutex garante mutabilidade segura; Arc garante ciclos de vida entre threads.
+    // RACIOCÍNIO HUMANO: Criamos um placar que todas as threads podem "tocar".
+    // RACIOCÍNIO DO COMPUTADOR: Alocamos um inteiro na Heap. O Mutex cria uma barreira 
+    // de memória (Memory Barrier). O Arc coloca um contador atômico ao lado do dado. 
+    // Enquanto o contador for > 0, o SO não desaloca essa memória (RAII).
     let vitorias_p1 = Arc::new(Mutex::new(0));
     let mut handles = vec![];
 
     for i in 0..10 {
-        // AQUI: Clonamos apenas a referência do Arc (barato), aumentando o contador de referências.
+        // RACIOCÍNIO DO COMPUTADOR: O clone do Arc NÃO copia o dado (o número 0). 
+        // Ele apenas incrementa o contador atômico na CPU (instrução LOCK INC). 
+        // É uma operação de nanossegundos que evita o uso de ponteiros inseguros.
         let contador_clonado = Arc::clone(&vitorias_p1);
         
-        // AQUI: A thread assume o Ownership de suas variáveis (clausura move).
+        // thread::spawn solicita ao Kernel do SO a criação de uma thread nativa.
+        // O 'move' transfere a Posse (Ownership) das variáveis capturadas para a thread.
         let handle = thread::spawn(move || {
             let p1 = JogadorComputador;
             let p2 = JogadorComputador;
@@ -387,22 +534,33 @@ fn main() {
             println!("Thread {}: {:?} vs {:?} -> {:?}", i, jogada_p1, jogada_p2, resultado);
 
             if resultado == Resultado::Vitoria {
-                // AQUI: Travamos o Mutex para alterar o valor interior com segurança.
+                // RACIOCÍNIO HUMANO: "Peraí, vou travar o placar pra anotar meu ponto".
+                // RACIOCÍNIO DO COMPUTADOR: Invocamos uma Syscall (Futex no Linux). 
+                // Se o Mutex estiver travado, a thread entra em 'Sleep' e sai da CPU. 
+                // O 'unwrap' trata o 'Poisoning' (se uma thread morrer com o cadeado na mão).
                 let mut num = contador_clonado.lock().unwrap();
-                *num += 1;
+                *num += 1; // Dereferencing: alteramos o valor direto no endereço de memória.
             }
         });
         handles.push(handle);
     }
 
-    // Aguarda todas as threads terminarem.
+    // O 'join' suspende a thread principal até que o Program Counter (PC) 
+    // de todas as threads filhas chegue ao fim. Sem isso, o processo morre antes 
+    // dos trabalhadores terminarem.
     for handle in handles {
         handle.join().unwrap();
     }
 
-    println!("Total de vitórias do P1 na simulação: {}", *vitorias_p1.lock().unwrap());
+    println!("Total de vitórias do P1: {}", *vitorias_p1.lock().unwrap());
 }
 ```
+
+### A Vantagem Real em cima do JavaScript (Node.js)
+
+1. **Overhead de Memória:** No JavaScript, cada *Worker* carrega uma nova instância da V8, consumindo dezenas de megabytes. No Rust, cada thread consome apenas o tamanho da sua **Stack** (geralmente 2MB), compartilhando o código binário e os dados via Arc.
+2. **Paralelismo vs Concorrência:** No Node.js, você tem concorrência (várias coisas "andando" ao mesmo tempo no Event Loop). No Rust, você tem **Paralelismo Real**: os 10 jogos de Jokenpo rodam em núcleos diferentes da CPU simultaneamente.
+3. **Segurança em Compile-time:** No JS, se você usar `SharedArrayBuffer` sem `Atomics.add`, você vai ter corrupção de memória e o JS não vai te avisar. No Rust, se você tentar acessar o contador sem dar o `.lock()`, o código **simplesmente não compila**.
 
 **Como testar e Resultado Esperado:**
 
@@ -431,33 +589,44 @@ Engenharia de software madura exige testes automatizados para blindar a regra de
 Adicione o bloco abaixo no **final** de `src/domain/models.rs`:
 
 ```rust
-// AQUI: Esta configuração diz ao compilador para incluir este módulo APENAS durante 'cargo test'.
-#[cfg(test)]
+// RACIOCÍNIO UNIFICADO: Ativando a blindagem do motor de regras.
+#[cfg(test)] // (Conditional Compilation): Só compila se o flag 'test' estiver ativo.
 mod tests {
-    // Importa tudo do módulo pai (models).
-    use super::*;
+    use super::*; // (Scope Mapping): Puxa 'Jogada' e 'Resultado' do módulo pai sem re-alocar símbolos.
     use std::str::FromStr;
 
-    #[test]
+    #[test] // (Test Metadata): Marca a função como um entry-point para o runner do Cargo.
     fn test_vitoria_pedra_sobre_tesoura() {
-        // AQUI: Validando a regra central de negócios do nosso domínio.
+        // RACIOCÍNIO DO COMPUTADOR: Executa 'avaliar' e faz a comparação direta de bits (Bitwise Comparison).
+        // Se o resultado na Stack for diferente de 'Vitoria', dispara um Panic e encerra o processo de teste.
         assert_eq!(Jogada::Pedra.avaliar(&Jogada::Tesoura), Resultado::Vitoria);
     }
 
     #[test]
     fn test_parse_sucesso() {
+        // RACIOCÍNIO HUMANO: Garante que espaços e letras maiúsculas não quebrem o I/O.
         let jogada = Jogada::from_str("  PaPeL ").unwrap();
         assert_eq!(jogada, Jogada::Papel);
     }
 
     #[test]
     fn test_parse_falha_erro_customizado() {
+        // RACIOCÍNIO DO COMPUTADOR: Checa se o 'Result' retornou a variante 'Err' (Error Variant Checking).
+        // Diferente do JS, onde você daria um 'catch', aqui validamos o estado do Enum retornado.
         let erro = Jogada::from_str("fogo");
-        // AQUI: Assegura que o sistema retorna um Err, e não pânico, garantindo estabilidade do sistema.
         assert!(erro.is_err());
     }
 }
 ```
+
+**Raciocínio Humano (A Abstração):**
+O problema que resolvemos aqui é o **Medo de Refatoração (Fear of Refactoring)**. Sem testes, se você decidir mudar a regra do Jokenpo amanhã, você vai quebrar o sistema e só descobrir quando o usuário reclamar. Em Rust, os testes moram no mesmo arquivo do código (In-source testing), garantindo que a documentação técnica (os testes) nunca fique defasada em relação à implementação.
+
+**Raciocínio do Computador (A Escovação de Bits):**
+A macro `#[cfg(test)]` é uma **Diretiva de Compilação Condicional (Conditional Compilation)**. Ela instrui o compilador (`rustc`) a tratar esse bloco como "código morto" durante um `cargo build` normal. Ele literalmente deleta esses bytes do binário final. A CPU nunca vai carregar essas instruções em produção. Só quando você roda `cargo test` é que o compilador ativa o **Test Harness** (Equipamento de Teste) nativo e gera um executável separado para validação.
+
+**Vantagem sobre o JavaScript:**
+No ecossistema Node.js, você precisa de bibliotecas externas (Jest, Mocha, Vitest) que incham o seu `package.json` e exigem configurações complexas de *bundlers* para garantir que o código de teste não vá parar no seu *bundle* de produção. Em Rust, isso é nativo, garantindo **Zero-Cost Abstraction** (Abstração de Custo Zero): você tem a conveniência dos testes sem pagar 1 byte de overhead no executável final.
 
 **Como testar e Resultado Esperado:**
 
@@ -467,7 +636,9 @@ mod tests {
     
     `cargo test`
     
-    *Resultado Esperado:* A saída mostrará `running 3 tests`, listando `test_vitoria_pedra_sobre_tesoura`, `test_parse_sucesso` e `test_parse_falha_erro_customizado` todos com o status `ok`.
+    *Resultado Esperado:* 
+    
+    A saída mostrará `running 3 tests`, listando `test_vitoria_pedra_sobre_tesoura`, `test_parse_sucesso` e `test_parse_falha_erro_customizado` todos com o status `ok`.
     
 2. **Compilar para Produção (Otimização):**
     
@@ -509,43 +680,86 @@ Para resolver essa discrepância de design sem poluir a nossa Trait pura com ló
 Adicione as seguintes importações no **topo** do arquivo `src/domain/player.rs` (logo abaixo dos `use` existentes):
 
 ```rust
-// AQUI: std::io para manipular entrada/saída, e Write para forçar a exibição do print! antes do input.
+// RACIOCÍNIO UNIFICADO (Akita Mode: Abstração + Bits):
+// No JavaScript, você tem o 'console' e o 'process' jogados no escopo global (Global Scope). 
+// É conveniente? Sim. É porco? Com certeza. O Rust segue a filosofia de "não pague pelo 
+// que não usa". O 'use' não é um 'import' de runtime que carrega arquivos pesados; 
+// é só um aviso pro compilador (rustc) mapear nomes na Tabela de Símbolos (Symbol Table).
+//
+// std::io::{self, Write}:
+// - io (Module): Abre o sub-sistema de entrada e saída.
+// - Write (Trait): Aqui está o segredo. Stdout é "Line Buffered" (Bufferizado por Linha). 
+//   Se você der um 'print!' sem '\n', os bits ficam presos no buffer da RAM e não chegam 
+//   no terminal. Importamos a interface 'Write' para ter acesso à instrução 'flush' 
+//   (Buffer Flush), que força a Syscall do SO a despejar os dados na tela antes de 
+//   travar o programa esperando o usuário.
 use std::io::{self, Write};
-// AQUI: Importamos a trait FromStr para que o compilador saiba que a string pode chamar o método parse().
+
+// std::str::FromStr (Trait):
+// No JS, você faz um 'parseInt()' ou uma gambiarra qualquer e reza pra não vir um 'NaN'. 
+// Em Rust, usamos Polimorfismo Ad-hoc (Ad-hoc Polymorphism) via Traits. Ao importar 
+// 'FromStr', você habilita o compilador a "enxergar" que uma string pode se transformar 
+// no seu tipo 'Jogada' através de um contrato padronizado. É o que chamamos de 
+// Interface de Parsing (Parsing Interface).
 use std::str::FromStr;
 ```
 
 Agora, adicione o seguinte bloco de código no **final** do arquivo `src/domain/player.rs`:
 
 ```rust
+// RACIOCÍNIO UNIFICADO (Akita Mode: Abstração + Bits):
+// No JS, você faria uma classe com constructor vazio. Aqui, 'pub struct JogadorHumano;' 
+// é uma 'Unit-like Struct'. Pro computador, isso é um ZST (Zero-Sized Type). 
+// Ocupa 0 bytes na RAM. É só um marcador pro compilador associar métodos.
 pub struct JogadorHumano;
 
 impl Jogador for JogadorHumano {
     fn escolher_jogada(&self) -> Jogada {
-        // AQUI: Loop infinito que atua como um 'Retry Pattern'. Só sairemos dele com um input válido.
+        // RACIOCÍNIO HUMANO: Implementamos o 'Retry Pattern'. Se o usuário for um 
+        // imbecil e digitar errado, o sistema não crasha; ele pergunta de novo.
+        //
+        // RACIOCÍNIO DO COMPUTADOR: 'loop' gera uma instrução JMP (Jump) incondicional 
+        // no nível da CPU. Diferente do JS, onde loops infinitos podem travar o Event Loop 
+        // se não forem asíncronos, aqui temos controle total do fluxo de execução.
         loop {
             print!("Digite sua jogada (pedra, papel, tesoura): ");
-            // AQUI: Como print! não tem quebra de linha, o buffer do stdout pode reter o texto. O flush() força a exibição na tela.
+            
+            // RACIOCÍNIO DO COMPUTADOR: 'stdout' é bufferizado por linha. Como o 'print!' 
+            // não tem '\n', os bits ficam "presos" na RAM. O 'flush()' é a instrução 
+            // que força a CPU a despejar esses bytes na tela antes de parar tudo.
             io::stdout().flush().unwrap();
 
+            // 'String::new()' faz uma alocação dinâmica na HEAP. 
             let mut input = String::new();
             
-            // AQUI: read_line exige uma referência mutável (&mut) da String. Ele não toma o Ownership da variável, apenas a preenche.
+            // 'read_line' faz uma Syscall pro SO. Passamos uma referência mutável (&mut). 
+            // Não estamos movendo a posse; estamos dando permissão pro SO preencher 
+            // esse endereço de memória com o que vier do teclado.
             if io::stdin().read_line(&mut input).is_err() {
-                println!("Erro ao ler o terminal. Tente novamente.");
-                continue;
+                println!("Erro de I/O. Tentando novamente...");
+                continue; // (Control Flow Optimization)
             }
 
-            // AQUI: Chamamos explicitamente nossa trait FromStr do Módulo 3.
-            // O pattern matching extrai o valor em caso de Ok, ou mostra nosso erro de domínio customizado no terminal em caso de Err.
+            // RACIOCÍNIO HUMANO: Aqui está a vantagem em cima do JavaScript. 
+            // No JS, você faria um 'parse' e torceria pra não vir um 'NaN' ou 'undefined'. 
+            // No Rust, a Trait 'FromStr' te obriga a lidar com o 'Result'. 
+            // Ou o dado entra no Domínio (Ok), ou o erro é tratado na hora (Err).
             match Jogada::from_str(&input) {
-                Ok(jogada) => return jogada, // Retorno antecipado, quebra o loop e cumpre o contrato da Trait.
+                // (Early Return): cumpre o contrato da Trait e desaloca o buffer da String.
+                Ok(jogada) => return jogada, 
+                // Usamos nosso erro customizado do Módulo 3 para feedback visual.
                 Err(erro_dominio) => println!("{}", erro_dominio),
             }
         }
     }
 }
 ```
+
+### Por que Rust é superior ao JavaScript aqui?
+
+1. **Controle de Buffer:** No Node.js, você raramente controla quando o `stdout` é despejado. Se o evento de loop estiver ocupado, sua mensagem pode atrasar. No Rust, o `flush()` garante que o usuário veja a pergunta no exato ciclo de CPU que você definiu.
+2. **Exaustividade vs. NaN:** Se você tentar converter uma string pra número no JS e falhar, você ganha um `NaN` (Not a Number) e o programa continua rodando em estado zumbi até explodir lá na frente. No Rust, o contrato `FromStr` te obriga a retornar um `Result` (Sum Type). O compilador **não te deixa ignorar o erro**.
+3. **Zero Runtime Overhead:** No JS, cada import adiciona peso na árvore de objetos em tempo de execução. No Rust, as Traits são resolvidas via **Monomorfização (Monomorphization)** em tempo de compilação. O custo em runtime é literalmente **zero**.
 
 **Como testar e Resultado Esperado:**
 
@@ -576,34 +790,52 @@ Para transformar nossa simulação em um jogo real, vamos descartar a concorrên
 **Substitua** todo o conteúdo do seu arquivo `src/main.rs` pelo bloco abaixo:
 
 ```rust
+// RACIOCÍNIO UNIFICADO (Akita Mode): 
+// 'mod domain' não é um import de biblioteca, é uma Compiler Directive (Diretiva de Compilação). 
+// No JS, o Webpack ou o Vite tentam resolver caminhos. Aqui, você está instruindo o Linker 
+// do rustc a mapear os bits dos módulos no binário final. Sem isso, a pasta 'domain' 
+// é apenas lixo no seu HD (Dead Code Elimination).
 mod domain;
 
+// 'use' é apenas Namespace Aliasing. Diferente do 'require' do Node.js, ele não toca no 
+// sistema de arquivos em runtime. Ele só mapeia nomes na Tabela de Símbolos (Symbol Table) 
+// em tempo de compilação. Zero overhead de processamento.
 use domain::models::Resultado;
-// AQUI: Importamos a nova struct JogadorHumano junto com as dependências anteriores.
 use domain::player::{Jogador, JogadorComputador, JogadorHumano};
 use std::io::{self, Write};
 
 fn main() {
     println!("=== BEM-VINDO AO JOKENPO EM RUST ===");
     
-    // AQUI: Instanciamos nossas dependências concretas. Zero custo de memória extra.
+    // RACIOCÍNIO HUMANO: Injetamos as peças concretas (Dependency Injection).
+    // RACIOCÍNIO DO COMPUTADOR: Como são structs vazias, o Rust não aloca nada na Heap. 
+    // São apenas "marcos" pro compilador saber qual implementação de Trait chamar.
     let humano = JogadorHumano;
     let computador = JogadorComputador;
 
-    // AQUI: O Game Loop principal.
+    // O "Big Loop" (Game Loop). No nível do processador, isso gera uma instrução 
+    // incondicional JMP (Jump) de volta para o topo da função. 
+    // Vantagem sobre o JS: No Node.js, um loop síncrono travaria o Event Loop. 
+    // Aqui, temos controle total da thread principal do Sistema Operacional.
     loop {
         println!("\n--- Nova Rodada ---");
         
-        // AQUI: O Polimorfismo brilha! Chamamos exatamente o mesmo método para entidades completamente diferentes.
+        // Aqui o polimorfismo brilha via Traits. O compilador sabe exatamente qual 
+        // byte chamar para o humano e qual chamar para o bot (Static Dispatch).
         let jogada_humano = humano.escolher_jogada();
         let jogada_pc = computador.escolher_jogada();
 
         println!("Você escolheu: {:?}", jogada_humano);
         println!("O computador escolheu: {:?}", jogada_pc);
 
-        // AQUI: Invocamos nossa regra de negócio do Módulo 2 e 3.
+        // 'avaliar' recebe uma referência (&). Estamos passando apenas o endereço 
+        // de memória (Pointer) da stack, sem mover a posse (Ownership). 
+        // O custo de passar 8 bytes (um ponteiro) é desprezível.
         let resultado = jogada_humano.avaliar(&jogada_pc);
         
+        // Pattern Matching: o compilador transforma isso numa Jump Table (Tabela de Saltos). 
+        // Diferente de um 'switch' do JS que pode ser O(n), aqui é O(1). 
+        // A CPU pula direto pro bloco de código correto baseado nos bits do Enum.
         match resultado {
             Resultado::Vitoria => println!("🎉 Você VENCEU a rodada!"),
             Resultado::Derrota => println!("💀 Você PERDEU a rodada!"),
@@ -611,15 +843,19 @@ fn main() {
         }
 
         print!("\nDeseja jogar novamente? (s/n): ");
-        io::stdout().flush().unwrap();
+        // Stdout é bufferizado por linha. O 'flush()' é uma Syscall que força a 
+        // CPU a despejar o buffer na tela antes do programa travar no I/O.
+        io::stdout().flush().unwrap(); 
         
         let mut continuar = String::new();
+        // Chamada de sistema para ler o stdin. Passamos a referência mutável (&mut) 
+        // para o SO preencher a memória que já alocamos, evitando re-alocações inúteis.
         io::stdin().read_line(&mut continuar).unwrap();
         
-        // Avaliação simples da intenção do usuário para continuar ou quebrar o Game Loop.
+        // Sanitização básica. 'trim()' e 'to_lowercase()' limpam o lixo do buffer.
         if continuar.trim().to_lowercase() != "s" {
-            println!("Saindo do jogo... Obrigado por jogar!");
-            break;
+            println!("Saindo... Obrigado por jogar!");
+            break; // Quebra o fluxo (Control Flow) e encerra o processo (Exit Code 0).
         }
     }
 }
