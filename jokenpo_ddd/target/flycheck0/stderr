@@ -1,0 +1,52 @@
+   0.341402898s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint: stale: changed "/workspaces/aula-rust/jokenpo_ddd/src/main.rs"
+   0.341475854s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint:           (vs) "/workspaces/aula-rust/jokenpo_ddd/target/debug/.fingerprint/jokenpo_ddd-970045b30a6d9c77/dep-bin-jokenpo_ddd"
+   0.341505549s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1774658820, nanos: 670342199 } < FileTime { seconds: 1774658849, nanos: 159340289 }
+   0.348463037s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint: fingerprint dirty for jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd)/Check { test: false }/TargetInner { name: "jokenpo_ddd", doc: true, ..: with_path("/workspaces/aula-rust/jokenpo_ddd/src/main.rs", Edition2024) }
+   0.348513010s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/workspaces/aula-rust/jokenpo_ddd/target/debug/.fingerprint/jokenpo_ddd-970045b30a6d9c77/dep-bin-jokenpo_ddd", reference_mtime: FileTime { seconds: 1774658820, nanos: 670342199 }, stale: "/workspaces/aula-rust/jokenpo_ddd/src/main.rs", stale_mtime: FileTime { seconds: 1774658849, nanos: 159340289 } }))
+   0.525222696s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint: fingerprint error for jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd)/Check { test: true }/TargetInner { name: "jokenpo_ddd", doc: true, ..: with_path("/workspaces/aula-rust/jokenpo_ddd/src/main.rs", Edition2024) }
+   0.527123251s  INFO prepare_target{force=false package_id=jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd) target="jokenpo_ddd"}: cargo::core::compiler::fingerprint:     err: failed to read `/workspaces/aula-rust/jokenpo_ddd/target/debug/.fingerprint/jokenpo_ddd-34b4687dd7b4b76f/test-bin-jokenpo_ddd`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/panicking.rs:581:40
+  16: std::panicking::catch_unwind
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/panicking.rs:581:40
+  20: std::panicking::catch_unwind
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/panicking.rs:544:19
+  21: std::panic::catch_unwind
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/4a4ef493e3a1488c6e321570238084b38948f6db/library/std/src/rt.rs:171:5
+  23: main
+  24: __libc_start_call_main
+             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+  25: __libc_start_main_impl
+             at ./csu/../csu/libc-start.c:360:3
+  26: <unknown>
+    Checking jokenpo_ddd v0.1.0 (/workspaces/aula-rust/jokenpo_ddd)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.21s
