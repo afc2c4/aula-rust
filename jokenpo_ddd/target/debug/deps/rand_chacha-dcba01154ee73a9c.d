@@ -1,0 +1,9 @@
+/workspaces/aula-rust/jokenpo_ddd/target/debug/deps/rand_chacha-dcba01154ee73a9c.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/chacha.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/guts.rs
+
+/workspaces/aula-rust/jokenpo_ddd/target/debug/deps/librand_chacha-dcba01154ee73a9c.rlib: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/chacha.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/guts.rs
+
+/workspaces/aula-rust/jokenpo_ddd/target/debug/deps/librand_chacha-dcba01154ee73a9c.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/chacha.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/guts.rs
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/lib.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/chacha.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand_chacha-0.3.1/src/guts.rs:

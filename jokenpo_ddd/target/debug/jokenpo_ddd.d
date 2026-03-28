@@ -1,0 +1,1 @@
+/workspaces/aula-rust/jokenpo_ddd/target/debug/jokenpo_ddd: /workspaces/aula-rust/jokenpo_ddd/src/domain/errors.rs /workspaces/aula-rust/jokenpo_ddd/src/domain/mod.rs /workspaces/aula-rust/jokenpo_ddd/src/domain/models.rs /workspaces/aula-rust/jokenpo_ddd/src/domain/player.rs /workspaces/aula-rust/jokenpo_ddd/src/main.rs
